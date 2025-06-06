@@ -85,3 +85,8 @@ resource "azurerm_network_interface" "nic" {
     public_ip_address_id          = azurerm_public_ip.web.id
   }
 }
+
+resource "azurerm_network_interface_security_group_association" "nic_nsg" {
+  network_interface_id      = azurerm_network_interface.nic.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
