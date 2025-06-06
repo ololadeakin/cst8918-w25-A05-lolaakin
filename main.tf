@@ -90,3 +90,41 @@ resource "azurerm_network_interface_security_group_association" "nic_nsg" {
   network_interface_id      = azurerm_network_interface.nic.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
+
+data "cloudinit_config" "config" {
+  part {
+    content_type = "text/x-shellscript"
+    content      = file("${path.module}/init.sh")
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "web" {
+  name                = "${var.labelPrefix}-A05-vm"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = var.region
+  size                = "Standard_B1s"
+  admin_username      = var.admin_username
+  network_interface_ids = [
+    azurerm_network_interface.nic.id,
+  ]
+
+  admin_ssh_key {
+    username   = var.admin_username
+    public_key = file("~/.ssh/id_rsa.pub")
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    name                 = "${var.labelPrefix}-A05-osdisk"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "20_04-lts"
+    version   = "latest"
+  }
+
+  custom_data = data.cloudinit_config.config.rendered
+}
