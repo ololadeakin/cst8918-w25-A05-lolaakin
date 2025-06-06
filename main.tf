@@ -128,3 +128,10 @@ resource "azurerm_linux_virtual_machine" "web" {
 
   custom_data = data.cloudinit_config.config.rendered
 }
+output "resource_group_name" {
+  value = azurerm_resource_group.main.name
+}
+
+output "public_ip_address" {
+  value = azurerm_public_ip.web.ip_address
+}
